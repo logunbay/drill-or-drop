@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Drill or Drop: The Delta Basin Licence Round</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#f5f2ec;--card:#fffdf9;--ink:#1d2430;--muted:#5b6472;--line:#ddd6c9;--accent:#c4621d;--deep:#14213d;--ok:#2f7d5b;--bad:#a83232;}
+*{box-sizing:border-box}
+body{margin:0;font-family:Inter,Arial,sans-serif;background:var(--bg);color:var(--ink);line-height:1.5}
+header{background:var(--deep);color:#f5f2ec;padding:14px 20px;display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between}
+header h1{font-size:18px;margin:0;font-weight:700}
+header small{color:#c9d1dd;display:block;font-weight:400;font-size:13px}
+.steps{display:flex;gap:6px;flex-wrap:wrap}
+.steps span{font-size:12px;padding:4px 9px;border-radius:999px;background:#25355c;color:#c9d1dd}
+.steps span.on{background:var(--accent);color:#fff}.steps span.done{background:var(--ok);color:#fff}
+main{max-width:1200px;margin:0 auto;padding:18px;display:grid;grid-template-columns:1.25fr 1fr;gap:18px}
+@media(max-width:880px){main{grid-template-columns:1fr}}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px;min-width:0}
+h2{font-size:20px;margin:0 0 6px}h3{font-size:16px;margin:16px 0 6px}
+.kicker{font-size:12px;letter-spacing:1px;text-transform:uppercase;color:var(--accent);font-weight:600}
+svg{width:100%;height:auto;display:block}
+.mentor{display:flex;gap:12px;align-items:flex-start;margin-top:10px}
+.avatar{flex:none;width:44px;height:44px;border-radius:50%;background:var(--deep);color:#f0a04b;display:grid;place-items:center;font-weight:700}
+.bubble{background:#eef2f7;border-radius:12px;padding:11px 13px;font-size:15px}
+.fb-good{background:#e5f4e4}.fb-mid{background:#f9eeda}.fb-bad{background:#fbebeb}
+.opts{display:flex;flex-direction:column;gap:8px;margin:12px 0}
+button{font-family:inherit;font-size:15px;cursor:pointer;border-radius:10px;border:1px solid var(--line);background:#fff;color:var(--ink);padding:10px 13px;text-align:left}
+button:hover:not(:disabled){border-color:var(--accent)}
+button:disabled{cursor:default;opacity:.85}
+button.pick{border:2px solid var(--accent);background:#fff6ee}
+.primary{background:var(--accent);color:#fff;border:none;text-align:center;font-weight:600}
+.primary:hover:not(:disabled){background:#a9521a}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.ghost{background:transparent;color:#f5f2ec;border:1px solid #5a6a8e;padding:6px 11px;font-size:13px}
+textarea,input[type=text],select{font-family:inherit;font-size:14px;border-radius:10px;border:1px solid var(--line);padding:9px 10px;background:#fff;color:var(--ink)}
+textarea{width:100%;min-height:60px;resize:vertical}
+.ask{margin-top:14px;border-top:1px dashed var(--line);padding-top:12px}
+.ask label,.small{font-size:13px;color:var(--muted)}
+.chk{display:flex;gap:10px;align-items:flex-start;padding:9px 11px;border:1px solid var(--line);border-radius:10px;background:#fff;font-size:14px}
+.chk input{width:18px;height:18px;margin-top:2px;flex:none}
+.chk.bought{background:#eef6ee}
+.video{background:var(--deep);color:#c9d1dd;border-radius:10px;padding:10px 12px;font-size:13px;display:flex;gap:10px;align-items:center}
+.video .play{width:32px;height:32px;border-radius:50%;background:#f0a04b;color:var(--deep);display:grid;place-items:center;font-weight:700;flex:none}
+.blk,.loc{cursor:pointer}
+.err{color:var(--bad);font-size:13px;margin-top:6px}
+table{border-collapse:collapse;width:100%;font-size:13px}
+td,th{border-bottom:1px solid var(--line);padding:6px 4px;text-align:left;vertical-align:top}
+.rt td,.rt th{text-align:center}.rt td:first-child,.rt th:first-child{text-align:left}
+.c-ok{color:var(--ok);font-weight:700}.c-bad{color:var(--bad);font-weight:700}.c-unk{color:#9aa4b1;font-weight:700}
+.emv,.info,.team{background:#f3eee5;border-radius:10px;padding:10px 12px;font-size:14px;margin-top:10px}
+.emv b{font-size:18px}
+.team ul{margin:4px 0 0;padding-left:18px}.team li{margin-bottom:3px}
+.seg{display:flex;flex-wrap:wrap;gap:6px}.seg button{padding:7px 11px;font-size:14px}
+.member{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px}
+.hidden{display:none}
+</style>
+</head>
+<body>
+<header>
+  <div><h1 id="appTitle"></h1><small id="teamLine">An AI-mentored exploration experience · fictional basin, real lessons</small></div>
+  <div class="row"><div class="steps" id="steps"></div><button class="ghost" id="voiceBtn" aria-pressed="false">Mentor voice: off</button></div>
+</header>
+<main><section class="card" id="vis"></section><section class="card" id="panel"></section></main>
+<script>
+/* Scenario content lives in scenario.json; the engine below runs any scenario in this format. */
+const SC={"id": "delta-basin-licence-round", "title": "Drill or Drop: The Delta Basin Licence Round", "version": "0.4.0", "summary": "Fictional Niger Delta-style deltaic margin. Five licence blocks; only one has every petroleum-system element working. Teams buy data, screen blocks, bid, drill and decide under changing market conditions.", "setting": "Fictional Delta Basin, Niger Delta-style deltaic margin with growth faults on the shelf, a shale diapir on the upper slope and a deep marine shale source rock.", "durationMinutes": 30, "mentor": {"name": "AE", "persona": "A calm senior Nigerian exploration geoscientist with 28 years of experience, mentoring a graduate team.", "rules": ["Never reveal which block works or name a fatal flaw the team has not uncovered.", "Coach with a question or a pointer rather than giving the answer.", "Use only facts contained in this scenario; say so when asked about anything else.", "Reply in at most three short sentences of plain English."]}, "elements": ["Source", "Reservoir", "Trap", "Seal", "Charge"], "roles": [{"id": "geo", "name": "Geologist", "focus": "Source, reservoir and analogues"}, {"id": "gph", "name": "Geophysicist", "focus": "Seismic, imaging, traps and faults"}, {"id": "com", "name": "Commercial lead", "focus": "Budget, value and the bid"}, {"id": "pe", "name": "Petroleum engineer", "focus": "Well cost, well location and appraisal"}], "roleTips": {"data": {"geo": "Which blocks have a question mark on source or reservoir? Analogues are cheap.", "gph": "Where is the seismic poor? Reprocessing answers trap and seal questions.", "com": "Keep the team inside the $3M budget. Ask what each item is worth.", "pe": "Note well costs per block; they matter at the bid."}, "screen": {"geo": "Is anything in your blocks marked with a cross for source, reservoir or charge?", "gph": "Do the trap and seal hold after reprocessing?", "com": "Which surviving block has the best value if it works?", "pe": "Which block can we actually drill at a sensible cost?"}, "bid": {"geo": "Turn the risk table into a chance of success.", "gph": "How much of the trap risk is still open?", "com": "You own this call: chance of success, bonus, and the rival.", "pe": "Confirm the dry-hole cost in the EMV."}, "drill": {"geo": "Which location tests the best reservoir?", "gph": "Avoid the fault and the gas cloud if you can.", "com": "A clean answer protects the value of the block.", "pe": "You own this call: where does the rig go?"}, "decide": {"geo": "What did the well prove about the play?", "gph": "Can the new well tie the seismic and improve the map?", "com": "You own this call: appraise, farm down, sell or wait?", "pe": "What would appraisal cost, and how many wells?"}}, "dataBudgetM": 3.0, "freeData": ["Regional 2D seismic grid (poor under the D-5 gas cloud)", "Published regional source-rock studies", "Public well database: names and depths only"], "blocks": [{"id": "D-3", "name": "D-3 · Inner shelf", "waterDepth": "30 m", "play": "Faulted shelf blocks near old wells", "resourceMMboe": 40, "valuePerBoe": 3, "wellCostM": 15, "expertCoS": 0.05, "rivalBidM": 10, "mapRect": [30, 95, 140, 95], "truth": {"Source": false, "Reservoir": true, "Trap": true, "Seal": true, "Charge": false}, "fatalFlaw": "Source", "flawText": "immature under the inner shelf", "free": {"Reservoir": "Old wells found good sands", "Trap": "Clear fault blocks on 2D", "Seal": "Thick shale cap in old wells"}, "result": {"key": "dry", "title": "Dry: good sands, no oil", "sands": [0.2, 0.2, 0.2, 0.2], "text": "Beautiful water-wet sands and not a trace of oil. The source beneath the inner shelf never got hot enough. The old wells were telling you that."}}, {"id": "D-5", "name": "D-5 · Outer shelf, Osprey West", "waterDepth": "120 m", "play": "Rollover against a shale diapir, under a gas cloud", "resourceMMboe": 150, "valuePerBoe": 3, "wellCostM": 60, "expertCoS": 0.3, "rivalBidM": 20, "mapRect": [200, 215, 125, 90], "truth": {"Source": true, "Reservoir": true, "Trap": true, "Seal": true, "Charge": true}, "fatalFlaw": null, "flawText": null, "free": {"Source": "Regional source mature here", "Reservoir": "Shelf-edge sands on trend"}, "result": null}, {"id": "D-7", "name": "D-7 · Upper slope, Osprey East", "waterDepth": "450 m", "play": "Textbook four-way 'turtle' structure", "resourceMMboe": 200, "valuePerBoe": 3, "wellCostM": 70, "expertCoS": 0.1, "rivalBidM": 20, "mapRect": [370, 205, 120, 85], "truth": {"Source": true, "Reservoir": true, "Trap": true, "Seal": true, "Charge": false}, "fatalFlaw": "Charge", "flawText": "carrier bed is a low, so oil migrates away", "free": {"Source": "Regional source mature", "Reservoir": "Slope fans on 2D", "Trap": "Perfect four-way on 2D", "Seal": "Regional marine shale"}, "result": {"key": "dry", "title": "Dry: perfect trap, no charge", "sands": [0.2, 0.2, 0.2, 0.2], "text": "The trap is exactly as mapped, the sands are excellent, and they're full of water. The carrier bed under the turtle is a low, so the oil climbed away toward the diapir, into D-5."}}, {"id": "D-9", "name": "D-9 · Shelf edge rollover", "waterDepth": "80 m", "play": "Rollover on a small growth fault", "resourceMMboe": 90, "valuePerBoe": 3, "wellCostM": 55, "expertCoS": 0.1, "rivalBidM": 10, "mapRect": [190, 105, 130, 85], "truth": {"Source": true, "Reservoir": true, "Trap": true, "Seal": false, "Charge": true}, "fatalFlaw": "Seal", "flawText": "fault throw smaller than sand thickness", "free": {"Source": "Regional source mature", "Reservoir": "Stacked shelf-edge sands", "Trap": "Rollover closure on 2D"}, "result": {"key": "dry", "title": "Leaked: residual oil, thin gas", "sands": [0.5, 0.2, 0.2, 0.2], "text": "Oil was here: you can see residual oil staining. But the fault throw is smaller than the sand, so sand sat against sand and the column leaked out through the relay zone."}}, {"id": "D-11", "name": "D-11 · Deep basin floor", "waterDepth": "1,800 m", "play": "Huge closure beyond the diapir", "resourceMMboe": 400, "valuePerBoe": 1, "wellCostM": 120, "expertCoS": 0.05, "rivalBidM": 10, "mapRect": [440, 300, 140, 75], "truth": {"Source": true, "Reservoir": false, "Trap": true, "Seal": true, "Charge": true}, "fatalFlaw": "Reservoir", "flawText": "sand never reached the basin floor", "free": {"Trap": "Very large closure on 2D", "Seal": "Thick deep-water shale"}, "result": {"key": "dry", "title": "Dry: no reservoir", "sands": [0, 0, 0, 0], "text": "3,000 ft of shale and a few gas shows. The delta's sand never reached this far out. Big closure, nothing to fill."}}], "dataItems": [{"id": "wells", "title": "Old well reports, D-3 area (analogue)", "costM": 0.2, "kind": "Analogue", "reveals": {"D-3": {"Source": {"ok": false, "text": "No shows, maturity too low (immature)"}, "Charge": {"ok": false, "text": "Nothing to charge from"}}}}, {"id": "basin", "title": "Regional basin model: maturity and migration", "costM": 1.5, "kind": "Study", "reveals": {"D-3": {"Source": {"ok": false, "text": "Immature under the inner shelf"}, "Charge": {"ok": false, "text": "No mature kitchen"}}, "D-5": {"Charge": {"ok": true, "text": "Carrier rises toward the diapir and focuses oil here"}}, "D-7": {"Charge": {"ok": false, "text": "Carrier is a low under the turtle; oil migrates away"}}, "D-9": {"Charge": {"ok": true, "text": "On the migration path"}}, "D-11": {"Source": {"ok": true, "text": "Mature, gas-prone"}, "Charge": {"ok": true, "text": "Charged with gas"}}}}, {"id": "reproc", "title": "Reprocess 2D through the gas cloud and faults", "costM": 1.0, "kind": "Seismic", "reveals": {"D-5": {"Trap": {"ok": true, "text": "Closure holds after depth conversion"}, "Seal": {"ok": true, "text": "Fault throw ~250 ft, more than the 80 ft sand"}}, "D-9": {"Seal": {"ok": false, "text": "Fault throw ~40 ft against 90 ft sand; relay ramp to the east"}}}}, {"id": "dw", "title": "Deep-water analogue well, 30 km south (public report)", "costM": 0.3, "kind": "Analogue", "reveals": {"D-11": {"Reservoir": {"ok": false, "text": "Distal shale; sands pinch out before the basin floor"}}}}, {"id": "geochem", "title": "Seabed geochemistry (seeps) survey", "costM": 1.2, "kind": "Survey", "reveals": {"D-5": {"Charge": {"ok": true, "text": "Oil seeps above the structure"}}, "D-9": {"Charge": {"ok": true, "text": "Oil seeps nearby"}}, "D-7": {"Charge": {"ok": false, "text": "No seeps over the structure"}}, "D-11": {"Source": {"ok": true, "text": "Gas-only seeps"}}}}], "bid": {"cosOptionsPct": [10, 20, 30, 50], "bonusOptionsM": [5, 25, 110]}, "wellPlacement": {"block": "D-5", "locations": [{"id": "L1", "x": 300, "y": 125, "points": 1, "feedback": "L1 is on the crest, but right beside the fault and under the gas cloud. Bold, and risky."}, {"id": "L2", "x": 225, "y": 172, "points": 3, "feedback": "L2 is in the biggest upthrown block, on a seismic line, away from the fault. You give up a little height for a clean answer."}, {"id": "L3", "x": 330, "y": 66, "points": 0, "feedback": "L3 is on the downthrown side of the fault. That's outside the trap."}], "outcomes": {"L1": {"key": "marg", "title": "Marginal: thin gas over oil", "sands": [0.5, 0.5, 0.5, 0], "text": "Right block, risky spot. Near the fault the sands are thin and the column is gassy. About 40 ft of net pay.", "points": 1}, "L2": {"key": "disc", "title": "Discovery: three stacked oil sands", "sands": [1, 1, 1, 0], "text": "About 120 ft of net oil pay in three sands. The fourth sand shaled out at the channel margin, so even the right block came in below the pre-drill model.", "points": 3}, "L3": {"key": "dry", "title": "Dry: outside the trap", "sands": [0.2, 0.2, 0.2, 0.2], "text": "Good sands, all water-wet. You drilled across the fault.", "points": 0}}}, "events": [{"when": "Month 2", "text": "Oil price falls from $80 to $55 a barrel"}, {"when": "Month 4", "text": "A neighbour's well 8 km east is dry"}, {"when": "Month 6", "text": "A larger operator offers $25M cash for your block. Answer in two weeks."}], "decisions": {"disc": [{"text": "Appraise now with two wells, 100% funded", "points": 2, "feedback": "Bold, and you keep everything, but you carry the full risk while the price is falling."}, {"text": "Farm down 50% to a partner who pays for appraisal", "points": 3, "feedback": "The experienced call. You keep a big share, someone else funds the risk, and the neighbour's dry hole doesn't sink you."}, {"text": "Accept the $25M cash offer", "points": 0, "feedback": "The buyer offers because they see value you're about to give away."}, {"text": "Wait and study for a year", "points": 1, "feedback": "Cheap, but the licence clock runs and the buyer may walk."}], "marg": [{"text": "Appraise now, 100% funded", "points": 1, "feedback": "Expensive for a thin, gassy result at a falling price."}, {"text": "Farm down 50% for an appraisal carry", "points": 3, "feedback": "Good. Let a partner fund the test of whether the flank holds thicker oil."}, {"text": "Accept the $25M cash offer", "points": 1, "feedback": "Not crazy, but you may be selling the flank cheaply."}, {"text": "Wait for fault-seal and pressure studies", "points": 2, "feedback": "Sensible. Know whether the fault holds before spending more."}], "dry": [{"text": "Drill a second well on the same structure", "points": 0, "feedback": "The data told you why it failed. A second well won't fix the fatal flaw."}, {"text": "Relinquish and bid for D-5 in the next round", "points": 3, "feedback": "Right. Your dry hole proved the reservoir and the migration story. Take that knowledge to the block that works."}, {"text": "Sell the block for what it fetches", "points": 2, "feedback": "Reasonable, but your learning goes with it."}, {"text": "Hold and study for a year", "points": 1, "feedback": "Studying is fine, but you already know the answer."}]}, "stages": {"basin": {"video": "Reading a deltaic margin", "intro": "Welcome to the Delta Basin licence round. Five blocks are on offer. I'll tell you now: only one of them has every element working. The other four each hide a fatal flaw. Click each block to see what we know."}, "data": {"video": "Value of information", "intro": "Here's the data room. The table shows what our free data already supports, and the question marks show what we don't know. You have three million dollars. Buy studies, or cheap analogues, to find the fatal flaws. You can't buy everything, so think about which question each item answers."}, "screen": {"video": "Screening the blocks", "intro": "Now choose one block to bid on. Use the risk table. A single red cross means the block is dead, however big it looks. A question mark is a risk you're choosing to carry."}, "bid": {"video": "Turning risk into money", "intro": "Now the commercial side. Set your chance of success from the risk table, then choose your signature bonus. Another company is bidding too."}, "drill": {"video": "Choosing a well location", "intro": "This is Osprey West in D-5. Click where you'd drill. Remember the gas cloud and the fault."}, "decide": {"video": "Decisions under pressure", "intro": "Markets move, neighbours drill, and someone offers you money. What do you do?"}}, "realCases": ["Charge: two neighbouring Gulf of Mexico structures, one billion-barrel field and one dry", "Seal: rollover dry holes where throw was less than sand thickness", "Value of information and imaging: subsalt Gulf of Mexico well placement", "The cash offer: a North Sea heavy-oil discovery later developed into a large field"], "scoring": {"maxPerStage": 3, "stages": ["data", "screen", "bid", "drill", "reveal", "decide"], "bands": [{"min": 15, "label": "Senior explorer instincts"}, {"min": 10, "label": "Practitioner"}, {"min": 0, "label": "Graduate instincts"}]}};
+const STAGES=["Team","Basin","Data room","Screen","Bid","Drill","Reveal","Decide"];
+const BLK=Object.fromEntries(SC.blocks.map(b=>[b.id,b]));
+const ROLE=Object.fromEntries(SC.roles.map(r=>[r.id,r]));
+const S={i:-1,team:{name:"",members:[]},score:{},choices:{},owner:{},bought:[],block:null,cos:null,bid:null,loc:null,voice:false};
+let sample=null;(async()=>{try{sample=await window.claude?.use?.("sample")}catch(e){sample=null}})();
+const $=id=>document.getElementById(id);
+const esc=t=>String(t).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+$("appTitle").textContent=SC.title;
+
+/* ---------- voice ---------- */
+function speak(t){if(!S.voice||!("speechSynthesis" in window))return;try{speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(t.replace(/<[^>]+>/g,""));const vs=speechSynthesis.getVoices();const v=vs.find(v=>/en-(GB|NG|ZA)/.test(v.lang))||vs.find(v=>/^en/.test(v.lang));if(v)u.voice=v;u.pitch=.95;speechSynthesis.speak(u)}catch(e){}}
+$("voiceBtn").onclick=e=>{S.voice=!S.voice;e.target.textContent="Mentor voice: "+(S.voice?"on":"off");e.target.setAttribute("aria-pressed",S.voice);if(S.voice)speak(document.querySelector(".bubble")?.textContent||"Voice on.");else try{speechSynthesis.cancel()}catch(x){}};
+
+/* ---------- knowledge ---------- */
+function known(b){const k={};SC.elements.forEach(e=>k[e]=BLK[b].free[e]?{v:1,n:BLK[b].free[e]}:null);S.bought.forEach(id=>{const r=SC.dataItems.find(i=>i.id===id).reveals[b];if(r)for(const e in r)k[e]={v:r[e].ok?1:0,n:r[e].text}});return k}
+function riskTable(){return `<table class="rt"><tr><th>Block</th>${SC.elements.map(e=>`<th>${e}</th>`).join("")}</tr>${SC.blocks.map(b=>{const k=known(b.id);return `<tr><td><b>${b.id}</b></td>${SC.elements.map(e=>k[e]?`<td class="${k[e].v?'c-ok':'c-bad'}" title="${esc(k[e].n)}">${k[e].v?'✓':'✗'}</td>`:`<td class="c-unk" title="Unknown">?</td>`).join("")}</tr>`}).join("")}</table><p class="small">✓ supported by data · ✗ fatal flaw found · ? not yet known</p>`}
+const flawsFound=()=>SC.blocks.filter(b=>b.fatalFlaw&&known(b.id)[b.fatalFlaw]?.v===0).length;
+const totalFlaws=SC.blocks.filter(b=>b.fatalFlaw).length;
+
+/* ---------- graphics ---------- */
+function baseMap(click){
+ const blk=b=>{const[x,y,w,h]=b.mapRect,on=S.block===b.id;return `<g class="blk" data-b="${b.id}" ${click?'tabindex="0" role="button" aria-label="Block '+b.id+'"':''}><rect x="${x}" y="${y}" width="${w}" height="${h}" fill="${on?'rgba(196,98,29,.25)':'rgba(255,255,255,.35)'}" stroke="${on?'#c4621d':'#14213d'}" stroke-width="${on?3:1.5}"/><text x="${x+8}" y="${y+18}" font-size="13" font-weight="700" fill="#14213d">${b.id}</text><text x="${x+8}" y="${y+33}" font-size="10" fill="#14213d">WD ${b.waterDepth}</text></g>`};
+ return `<svg viewBox="0 0 600 390" role="img" aria-label="Base map of the Delta Basin with five licence blocks">
+<rect width="600" height="390" fill="#b9d6e8"/>
+<path d="M0 0 L600 0 L600 30 Q430 60 300 50 Q150 45 0 95Z" fill="#e9dfc4"/><text x="20" y="30" font-size="12" fill="#5a4a2a">Coast · delta plain</text>
+<path d="M0 95 Q150 45 300 50 Q430 60 600 30 L600 160 Q420 175 300 180 Q150 190 0 230Z" fill="#cfe3ef"/>
+<path d="M0 230 Q150 190 300 180 Q420 175 600 160" stroke="#355d7a" stroke-width="2" stroke-dasharray="6 4" fill="none"/><text x="470" y="152" font-size="11" fill="#355d7a">shelf edge</text>
+<path d="M0 320 Q200 270 600 245" stroke="#7aa3c0" fill="none"/><text x="500" y="262" font-size="10" fill="#355d7a">1,000 m</text>
+${[0,1,2,3,4,5].map(k=>`<line x1="${30+k*105}" y1="60" x2="${10+k*105}" y2="390" stroke="#fff" stroke-opacity=".7" stroke-dasharray="3 5"/>`).join("")}
+<line x1="0" y1="200" x2="600" y2="140" stroke="#fff" stroke-opacity=".7" stroke-dasharray="3 5"/>
+<path d="M20 120 Q90 110 170 112" stroke="#3a2f22" stroke-width="2" fill="none"/><path d="M185 128 Q260 118 330 122" stroke="#3a2f22" stroke-width="2" fill="none"/><path d="M190 232 Q260 222 335 226" stroke="#3a2f22" stroke-width="2" fill="none"/>
+<ellipse cx="345" cy="255" rx="22" ry="16" fill="#8a7f72"/><text x="325" y="285" font-size="10" fill="#3a2f22">shale diapir</text>
+<g fill="#7f8b99" opacity=".6">${Array.from({length:22},(_,k)=>`<circle cx="${250+(k*29)%55}" cy="${240+(k*17)%35}" r="2"/>`).join("")}</g>
+${SC.blocks.map(blk).join("")}
+<g fill="#14213d"><circle cx="70" cy="160" r="4"/><circle cx="120" cy="150" r="4"/><circle cx="100" cy="175" r="4"/></g><text x="60" y="186" font-size="9" fill="#14213d">old wells</text>
+<circle cx="520" cy="345" r="4" fill="#14213d"/><text x="460" y="388" font-size="9" fill="#14213d">analogue well 30 km S ↓</text>
+<text x="10" y="382" font-size="10" fill="#14213d">dashed white = 2D seismic · dark lines = growth faults · dots = gas cloud</text></svg>`}
+
+function contourPath(cx,cy,R,ph){let d="";for(let k=0;k<=72;k++){const t=k/72*Math.PI*2,r=R*(1+.09*Math.sin(3*t+ph)+.05*Math.sin(5*t+2*ph)+.03*Math.sin(9*t+ph));d+=(k?"L":"M")+(cx+r*1.75*Math.cos(t)).toFixed(1)+" "+(cy+r*Math.sin(t)).toFixed(1)}return d+"Z"}
+function prospectMap(){
+ const fills=["#f6ead2","#efdcb5","#e7c995","#ddb274","#cf9853","#bf7f3a"];
+ const cont=fills.map((f,k)=>`<path d="${contourPath(268,170,128-k*21,k*.7)}" fill="${f}" stroke="#8d7046" stroke-width=".8"/>`).join("");
+ const cf=[[210,120,250,215],[255,112,300,205],[300,108,335,190],[340,118,372,190],[180,150,205,230]];
+ const gaps=cf.map(([x1,y1,x2,y2])=>`<polygon points="${x1},${y1} ${x1+7},${y1} ${x2+7},${y2} ${x2},${y2}" fill="#5a4630" opacity=".85"/>`).join("");
+ return `<svg viewBox="0 0 600 330" role="img" aria-label="Osprey West top-reservoir depth map in D-5, faulted rollover with candidate well locations">
+<rect width="600" height="330" fill="#fbf8f2"/>
+${[0,1,2,3,4,5,6].map(k=>`<line x1="${70+k*75}" y1="20" x2="${40+k*75}" y2="310" stroke="#b9c7d6" stroke-dasharray="4 4"/>`).join("")}
+${cont}${gaps}
+<path d="M0 0 L600 0 L600 80 Q470 86 330 96 Q200 106 40 98 L0 98Z" fill="#fbf8f2"/>
+<path d="M40 98 Q200 106 330 96 Q470 86 600 80" stroke="#3a2f22" stroke-width="5" fill="none"/>
+${[60,110,160,210,260,310,360,410,460,510,560].map(x=>`<line x1="${x}" y1="${x<330?98+(x-40)*0.03:96-(x-330)*0.06}" x2="${x}" y2="${x<330?90+(x-40)*0.03:88-(x-330)*0.06}" stroke="#3a2f22" stroke-width="2"/>`).join("")}
+<text x="60" y="36" font-size="11" fill="#3a2f22">Bounding growth fault, throw ~250 ft (ticks on downthrown side)</text>
+<g fill="#7f8b99" opacity=".5">${Array.from({length:40},(_,k)=>`<circle cx="${285+(k*37)%75}" cy="${108+(k*23)%45}" r="2"/>`).join("")}</g>
+<text x="372" y="160" font-size="11" fill="#5b6472">gas cloud</text>
+<text x="20" y="318" font-size="10" fill="#5b6472">Contours schematic · brown polygons = crestal fault heave gaps · dashed = 2D lines</text>
+<text x="470" y="292" font-size="10" fill="#7a6240">spill ~ -6,300 ft</text>
+${SC.wellPlacement.locations.map(p=>`<g class="loc" data-loc="${p.id}" tabindex="0" role="button" aria-label="Well location ${p.id}"><circle cx="${p.x}" cy="${p.y}" r="15" fill="${S.loc===p.id?'#c4621d':'#14213d'}" stroke="#fff" stroke-width="2"/><text x="${p.x-8}" y="${p.y+4}" font-size="11" fill="#fff" font-weight="700">${p.id}</text></g>`).join("")}
+</svg>`}
+
+function lens(x,y,w,h,fill,dash){return `<path d="M${x-w} ${y} L${x+w} ${y} Q${x} ${y+2*h} ${x-w} ${y}Z" fill="${fill}" stroke="${dash?'#8d8577':'#3a2f22'}" stroke-width="1" ${dash?'stroke-dasharray="3 3"':''}/>`}
+function revealSvg(sands){
+ const st=s=>s===1?["#2f7d5b",62,16,"oil sand"]:s===0.5?["#d8a45a",34,7,"thin, leaked or gassy"]:s===0.2?["#7fb0d1",60,15,"water-wet sand"]:["none",46,10,"absent: shale"];
+ const panel=(x0,title,arr,pre)=>{let g=`<rect x="${x0}" y="30" width="280" height="260" fill="#e6dcc8"/>`;for(let k=0;k<7;k++)g+=`<line x1="${x0}" y1="${60+k*35}" x2="${x0+280}" y2="${62+k*35}" stroke="#cbbd9f"/>`;
+  g+=`<text x="${x0}" y="20" font-size="13" font-weight="600" fill="#1d2430">${title}</text><line x1="${x0+140}" y1="30" x2="${x0+140}" y2="290" stroke="#14213d" stroke-width="2.5"/>`;
+  arr.forEach((s,k)=>{const y=58+k*58;if(pre){g+=lens(x0+140,y,70,17,"#2f7d5b")+`<text x="${x0+218}" y="${y+14}" font-size="10" fill="#1d2430">Sand ${k+1}</text>`}else{const[f,w,h,l]=st(s);g+=f==="none"?lens(x0+140,y,w,h,"none",true):lens(x0+140,y,w,h,f);g+=`<text x="${x0+205}" y="${y+14}" font-size="10" fill="#1d2430">${l}</text>`}});
+  return g};
+ return `<svg viewBox="0 0 600 300" role="img" aria-label="Schematic cross-sections: pre-drill expected four oil sands versus post-drill result">
+<rect width="600" height="300" fill="#fbf8f2"/>${panel(10,"Pre-drill: 4 shelf incised-valley sands",[1,1,1,1],true)}${panel(310,"Post-drill: what the well found",sands,false)}</svg>`}
+
+/* ---------- mentor ---------- */
+const mentor=(t,c="")=>`<div class="mentor"><div class="avatar">${esc(SC.mentor.name)}</div><div class="bubble ${c}">${t}</div></div>`;
+const video=t=>`<div class="video"><div class="play">▶</div><div><b style="color:#fff">Stage video: ${esc(t)}</b><br>Placeholder for a 1-minute SCA instructor or avatar intro.</div></div>`;
+function teamBox(stage){const tips=SC.roleTips[stage];if(!tips||!S.team.members.length)return"";return `<div class="team"><b>Team focus</b><ul>${S.team.members.map(m=>`<li><b>${esc(m.name)}</b> (${ROLE[m.role].name}): ${esc(tips[m.role])}</li>`).join("")}</ul></div>`}
+function ownerPick(stage){if(S.team.members.length<2)return"";return `<p class="small" style="margin:12px 0 4px">Who on the team makes this call?</p><select id="owner_${stage}">${S.team.members.map((m,j)=>`<option value="${j}">${esc(m.name)} (${ROLE[m.role].name})</option>`).join("")}</select>`}
+function recordOwner(stage){const el=$("owner_"+stage);if(el){const m=S.team.members[+el.value];S.owner[stage]=`${m.name} (${ROLE[m.role].name})`;el.disabled=true}}
+function worldText(){return `${SC.setting} Blocks: ${SC.blocks.map(b=>`${b.id} (${b.play}, water ${b.waterDepth})`).join("; ")}. Only one block has all elements working; the others each hide one fatal flaw that data purchases can reveal. Team: ${S.team.members.map(m=>m.name+" as "+ROLE[m.role].name).join(", ")||"single player"}. Data bought: ${S.bought.join(", ")||"none"}. What the team currently knows: ${JSON.stringify(Object.fromEntries(SC.blocks.map(b=>[b.id,known(b.id)])))}.`}
+async function ask(q,out,ctx){
+ out.innerHTML=mentor("Thinking…");
+ if(!sample){out.innerHTML=mentor("The live mentor isn't available in this view. In the production build, the mentor answers here using only checked course material.");return}
+ const p=`You are ${SC.mentor.name}, ${SC.mentor.persona} ${worldText()}
+Rules: ${SC.mentor.rules.join(" ")}
+Current stage: ${ctx}. Choices so far: ${JSON.stringify(S.choices)}.
+The team says: "${q}"
+No markdown.`;
+ try{const r=await sample(p,{modelTier:"quick",onText:({text})=>{out.innerHTML=mentor(esc(text))}});out.innerHTML=mentor(esc(r.text));speak(r.text)}
+ catch(e){out.innerHTML=mentor(e&&e.code==="rate_limited"?"Lots of questions right now. Try again in a moment.":"The live mentor couldn't answer just now. Carry on.")}
+}
+const askBlock=()=>`<div class="ask"><label for="q">Ask the mentor or explain your reasoning</label><textarea id="q" placeholder="e.g. Which data would tell us if D-7 is charged?"></textarea><div class="err hidden" id="qerr">Type a question first.</div><div class="row" style="margin-top:8px"><button id="qbtn">Ask ${esc(SC.mentor.name)}</button></div><div id="qout"></div></div>`;
+function wireAsk(ctx){const b=$("qbtn");if(!b)return;$("q").oninput=()=>$("qerr").classList.add("hidden");b.onclick=()=>{const v=$("q").value.trim();if(!v){$("qerr").classList.remove("hidden");return}ask(v,$("qout"),ctx)}}
+function steps(){$("steps").innerHTML=STAGES.map((s,k)=>`<span class="${k<S.i?'done':k===S.i?'on':''}">${k+1}. ${s}</span>`).join("")}
+function go(k){S.i=k;steps();window.scrollTo(0,0);try{speechSynthesis.cancel()}catch(e){}[stTeam,stBasin,stData,stScreen,stBid,stDrill,stReveal,stDecide,stDebrief][k]()}
+const fbClass=p=>p===3?"fb-good":p>=1?"fb-mid":"fb-bad";
+
+/* ---------- 0. Team ---------- */
+function stTeam(){
+ $("vis").innerHTML=`<div class="kicker">Delta Basin · licence round · fictional</div><h2>Five blocks. One works. Find it before you spend the money.</h2>${baseMap(false)}<p>Your team has a small data budget, one bid and one well. Every decision changes what happens next, and an experienced mentor coaches you along the way.</p><p class="small">The basin is invented. Every lesson comes from a real well.</p>`;
+ $("panel").innerHTML=mentor(`Hello, I'm ${esc(SC.mentor.name)}. Set up your team first. Give each person a role: each role gets its own briefing at every stage. Playing alone? Just enter your own name.`)+
+ `<h3>Your team</h3><input type="text" id="tname" placeholder="Team name" style="width:100%;margin-bottom:10px">${[0,1,2,3].map(j=>`<div class="member"><input type="text" id="mn${j}" placeholder="Member ${j+1} name${j?' (optional)':''}"><select id="mr${j}">${SC.roles.map((r,k)=>`<option value="${r.id}" ${k===j?'selected':''}>${r.name}</option>`).join("")}</select></div>`).join("")}<div class="err hidden" id="terr">Enter at least one member's name.</div><button class="primary" id="begin" style="margin-top:6px">Start the licence round</button><p class="small" style="margin-top:10px">About ${SC.durationMinutes} minutes. Switch on the mentor voice at the top if you'd like.</p>`;
+ [0,1,2,3].forEach(j=>$("mn"+j).oninput=()=>$("terr").classList.add("hidden"));
+ $("begin").onclick=()=>{const mem=[0,1,2,3].map(j=>({name:$("mn"+j).value.trim(),role:$("mr"+j).value})).filter(m=>m.name);if(!mem.length){$("terr").classList.remove("hidden");return}
+  S.team={name:$("tname").value.trim()||"Team Delta",members:mem};$("teamLine").textContent=`${S.team.name}: ${mem.map(m=>m.name+" ("+ROLE[m.role].name+")").join(" · ")}`;go(1)};
+}
+
+/* ---------- 1. Basin ---------- */
+function stBasin(){
+ const st=SC.stages.basin;
+ $("vis").innerHTML=`<div class="kicker">Stage 2 · The basin</div><h2>Five blocks on offer</h2>${baseMap(true)}<div id="binfo" class="info">Click a block on the map.</div>`;
+ $("panel").innerHTML=video(st.video)+mentor(st.intro)+`<p class="small" style="margin-top:12px">${esc(SC.setting)} You'll have a $${SC.dataBudgetM}M data budget before the bid.</p><button class="primary" id="next" style="margin-top:8px">Open the data room</button>`+askBlock();
+ speak(st.intro);
+ const show=id=>{S.block=id;$("vis").querySelector("svg").outerHTML=baseMap(true);bind();const x=BLK[id];$("binfo").innerHTML=`<b>${esc(x.name)}</b><br>Water depth ${x.waterDepth} · ${esc(x.play)}<br>Unrisked P50 resource ~${x.resourceMMboe} MMboe · well cost ~$${x.wellCostM}M`};
+ const bind=()=>document.querySelectorAll(".blk").forEach(g=>{g.onclick=()=>show(g.dataset.b);g.onkeydown=e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();show(g.dataset.b)}}});
+ bind();$("next").onclick=()=>{S.block=null;go(2)};wireAsk("Stage 1 basin overview");
+}
+
+/* ---------- 2. Data room ---------- */
+function stData(){
+ const st=SC.stages.data,B=SC.dataBudgetM;
+ const draw=()=>{$("vis").innerHTML=`<div class="kicker">Stage 3 · The data room</div><h2>What we have, what we don't</h2>${riskTable()}<h3>Free data already in the room</h3><ul class="small">${SC.freeData.map(f=>`<li>${esc(f)}</li>`).join("")}</ul><div id="newinfo"></div>`};
+ draw();
+ $("panel").innerHTML=video(st.video)+mentor(st.intro)+teamBox("data")+`<p style="font-weight:600;margin:12px 0 6px">Data budget: <span id="bud">$${B.toFixed(1)}M left</span></p><div class="opts">${SC.dataItems.map(i=>`<label class="chk"><input type="checkbox" value="${i.id}"><span><b>${esc(i.title)}</b><br><span class="small">${i.kind} · $${i.costM}M</span></span></label>`).join("")}</div><div class="err hidden" id="derr"></div><button class="primary" id="buy">Buy selected data</button><div id="dfb"></div><div id="nextWrap"></div>`+askBlock();
+ speak(st.intro);
+ const boxes=[...document.querySelectorAll(".chk input")];
+ const spent=()=>boxes.filter(b=>b.checked).reduce((a,b)=>a+SC.dataItems.find(i=>i.id===b.value).costM,0);
+ const upd=()=>{const s=spent();$("bud").textContent=s<=B+1e-9?`$${(B-s).toFixed(1)}M left`:`Over budget by $${(s-B).toFixed(1)}M`;$("bud").style.color=s>B+1e-9?"#a83232":"";$("derr").classList.add("hidden")};
+ boxes.forEach(b=>b.onchange=upd);
+ $("buy").onclick=()=>{const sel=boxes.filter(b=>b.checked).map(b=>b.value);
+  if(!sel.length){$("derr").textContent="Select at least one item, or ask the mentor what each one tells you.";$("derr").classList.remove("hidden");return}
+  if(spent()>B+1e-9){$("derr").textContent="You're over budget. Drop an item.";$("derr").classList.remove("hidden");return}
+  S.bought=sel;S.choices["Data room"]=sel.map(id=>SC.dataItems.find(i=>i.id===id).title).join("; ");
+  boxes.forEach(b=>{b.disabled=true;b.closest(".chk").classList.toggle("bought",b.checked)});$("buy").disabled=true;draw();
+  const notes=[];sel.forEach(id=>{const it=SC.dataItems.find(i=>i.id===id);for(const b in it.reveals)for(const e in it.reveals[b]){const r=it.reveals[b][e];notes.push(`<li><b>${b} ${e}:</b> ${r.ok?'✓':'✗'} ${esc(r.text)}</li>`)}});
+  $("newinfo").innerHTML=`<h3>What your data revealed</h3><ul class="small">${notes.join("")}</ul>`;
+  const f=flawsFound();S.score.data=f>=totalFlaws?3:f===totalFlaws-1?2:f>=2?1:0;
+  const msg=f>=totalFlaws?"Excellent. You've uncovered every fatal flaw, and one block is left standing with no red marks. That's value of information done right.":f>=2?`You've found ${f} of the ${totalFlaws} fatal flaws. Look at the question marks that remain. One of them might be hiding the next dry hole.`:"You've spent money but learned little about the fatal flaws. Ask yourself which element is the real unknown in each block.";
+  $("dfb").innerHTML=mentor(msg,fbClass(S.score.data))+`<p class="small">Fatal flaws uncovered: <b>${f} / ${totalFlaws}</b> · Points ${S.score.data}/3</p>`;
+  $("nextWrap").innerHTML=`<button class="primary" id="next">Screen the blocks</button>`;$("next").onclick=()=>go(3);speak(msg)};
+ wireAsk("Stage 2 data room and value of information");
+}
+
+/* ---------- 3. Screen ---------- */
+function stScreen(){
+ const st=SC.stages.screen,good=SC.blocks.find(b=>!b.fatalFlaw).id;
+ $("vis").innerHTML=`<div class="kicker">Stage 4 · Screen</div><h2>Which block do we bid on?</h2>${baseMap(true)}${riskTable()}`;
+ $("panel").innerHTML=mentor(st.intro)+teamBox("screen")+ownerPick("screen")+`<div class="opts" id="opts">${SC.blocks.map(b=>`<button data-b="${b.id}"><b>${b.id}</b> · ${esc(b.play)} · ~${b.resourceMMboe} MMboe</button>`).join("")}</div><div id="fb"></div><div id="nextWrap"></div>`+askBlock();
+ speak(st.intro);
+ const choose=id=>{recordOwner("screen");S.block=id;S.choices.Screen=BLK[id].name;$("vis").querySelector("svg").outerHTML=baseMap(false);
+  document.querySelectorAll("#opts button").forEach(x=>{x.disabled=true;x.classList.toggle("pick",x.dataset.b===id)});
+  const flaw=BLK[id].fatalFlaw,seen=flaw&&known(id)[flaw]?.v===0;
+  S.score.screen=id===good?3:seen?0:1;
+  const msg=id===good?`Good choice. ${id} is the only block where nothing in the data says no. The gas cloud makes it look scary, but the reprocessing and the carrier focusing toward the diapir both support it.`:seen?`You've chosen a block your own data condemned: its ${flaw.toLowerCase()} is marked with a cross. Experience means believing the data, even when the structure is big and beautiful.`:`Understandable with what you knew, but ${id} still had a question mark where its fatal flaw sits. Buying the right data would have shown it.`;
+  $("fb").innerHTML=mentor(msg,fbClass(S.score.screen))+`<p class="small">Points ${S.score.screen}/3</p>`;
+  $("nextWrap").innerHTML=`<button class="primary" id="next">Build the bid</button>`;$("next").onclick=()=>go(4);speak(msg)};
+ document.querySelectorAll("#opts button").forEach(x=>x.onclick=()=>choose(x.dataset.b));
+ wireAsk("Stage 3 block screening");
+}
+
+/* ---------- 4. Bid ---------- */
+function stBid(){
+ const x=BLK[S.block],npv=x.resourceMMboe*x.valuePerBoe,st=SC.stages.bid;
+ const intro=`${st.intro} If ${S.block} works, it's worth about ${npv} million dollars to us after development and government take. A dry well costs ${x.wellCostM} million.`;
+ $("vis").innerHTML=`<div class="kicker">Stage 5 · The bid</div><h2>${esc(x.name)}</h2><table><tr><th>Input</th><th>Value</th></tr><tr><td>Unrisked P50 resource</td><td>${x.resourceMMboe} MMboe</td></tr><tr><td>Value to us if successful (after tax and development)</td><td>$${x.valuePerBoe}/boe → <b>$${npv}M</b></td></tr><tr><td>Exploration well cost (lost if dry)</td><td>$${x.wellCostM}M</td></tr><tr><td>Fiscal terms</td><td>Production sharing contract; signature bonus is the bid variable</td></tr></table><div class="emv" id="emv">Pick a chance of success and a bonus to see the expected value.</div><p class="small" style="margin-top:8px">EMV = (chance of success × value if successful) − (chance of failure × dry-hole cost) − signature bonus</p>`;
+ $("panel").innerHTML=video(st.video)+mentor(intro)+teamBox("bid")+`<p style="font-weight:600;margin:12px 0 6px">Your chance of success</p><div class="seg" id="cos">${SC.bid.cosOptionsPct.map(v=>`<button data-v="${v}">${v}%</button>`).join("")}</div><p style="font-weight:600;margin:14px 0 6px">Signature bonus bid</p><div class="seg" id="bid">${SC.bid.bonusOptionsM.map(v=>`<button data-v="${v}">$${v}M</button>`).join("")}</div>${ownerPick("bid")}<div class="err hidden" id="berr">Choose both a chance of success and a bid.</div><button class="primary" id="submit" style="margin-top:12px;display:block">Submit the bid</button><div id="fb"></div><div id="nextWrap"></div>`+askBlock();
+ speak(intro);
+ const calc=()=>{if(S.cos==null||S.bid==null)return;const c=S.cos/100,emv=c*npv-(1-c)*x.wellCostM-S.bid;$("emv").innerHTML=`Your EMV at ${S.cos}% and a $${S.bid}M bonus: <b style="color:${emv>=0?'#2f7d5b':'#a83232'}">${emv>=0?'+':''}$${emv.toFixed(0)}M</b>`};
+ const seg=(sel,key)=>document.querySelectorAll(sel+" button").forEach(b=>b.onclick=()=>{S[key]=+b.dataset.v;document.querySelectorAll(sel+" button").forEach(y=>y.classList.toggle("pick",y===b));$("berr").classList.add("hidden");calc()});
+ seg("#cos","cos");seg("#bid","bid");
+ $("submit").onclick=()=>{if(S.cos==null||S.bid==null){$("berr").classList.remove("hidden");return}
+  recordOwner("bid");document.querySelectorAll("#cos button,#bid button,#submit").forEach(y=>y.disabled=true);
+  const rival=x.rivalBidM,win=S.bid>rival,trueEmv=x.expertCoS*npv-(1-x.expertCoS)*x.wellCostM-S.bid,cosOk=Math.abs(S.cos/100-x.expertCoS)<=0.1;
+  S.choices.Bid=`${S.cos}% CoS, $${S.bid}M bonus, ${win?'won':'lost'}`;
+  S.score.bid=(cosOk?1:0)+(win?(trueEmv>=0?2:0):1);
+  let msg=win?`You won the block: the rival bid $${rival}M. `:`You lost: the rival bid $${rival}M and took the block. `;
+  msg+=`An experienced team would put the chance of success nearer ${Math.round(x.expertCoS*100)}%, which makes the true EMV of your bid ${trueEmv>=0?'+':''}$${trueEmv.toFixed(0)}M. `;
+  msg+=!win?"Losing a good block hurts, but it beats overpaying for a bad one. For training, you'll still drill it to see what you'd have found.":trueEmv>=0?"That's a bid that creates value.":"You paid more than the risked value. Winners of bidding wars often overpay.";
+  $("fb").innerHTML=mentor(msg,fbClass(S.score.bid))+`<p class="small">Points ${S.score.bid}/3</p>`;
+  $("nextWrap").innerHTML=`<button class="primary" id="next">${win?'Drill the well':'See what the well would have found'}</button>`;$("next").onclick=()=>go(5);speak(msg)};
+ wireAsk("Stage 4 commercial bid and EMV");
+}
+
+/* ---------- 5. Drill ---------- */
+function stDrill(){
+ const wp=SC.wellPlacement;
+ if(S.block!==wp.block){
+  $("vis").innerHTML=`<div class="kicker">Stage 6 · Drill</div><h2>${esc(BLK[S.block].name)}</h2>${baseMap(false)}<p>The well is planned on the crest of the mapped structure.</p>`;
+  const m="The rig is on location. There's only one sensible spot on this structure: the crest. Let's see what the rock says.";
+  $("panel").innerHTML=mentor(m)+`<button class="primary" id="next" style="margin-top:12px">Drill</button>`+askBlock();speak(m);S.score.drill=1;S.loc="crest";S.choices.Drill="Crest";$("next").onclick=()=>go(6);wireAsk("Stage 5 drilling");return}
+ const st=SC.stages.drill;
+ $("vis").innerHTML=`<div class="kicker">Stage 6 · Place the well</div><h2>Osprey West, ${wp.block}</h2>${prospectMap()}<p class="small">L1: crest, beside the fault, under the gas cloud · L2: largest upthrown block, on a line · L3: across the fault</p>`;
+ $("panel").innerHTML=video(st.video)+mentor(st.intro)+teamBox("drill")+ownerPick("drill")+`<div id="lfb"></div><div class="err hidden" id="werr">Click a location on the map first.</div><button class="primary" id="next" style="margin-top:12px;display:block">Drill the well</button>`+askBlock();speak(st.intro);
+ const pick=id=>{S.loc=id;$("vis").querySelector("svg").outerHTML=prospectMap();bind();const L=wp.locations.find(l=>l.id===id);$("lfb").innerHTML=mentor(L.feedback,fbClass(L.points));$("werr").classList.add("hidden");speak(L.feedback)};
+ const bind=()=>document.querySelectorAll(".loc").forEach(g=>{g.onclick=()=>pick(g.dataset.loc);g.onkeydown=e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();pick(g.dataset.loc)}}});bind();
+ $("next").onclick=()=>{if(!S.loc){$("werr").classList.remove("hidden");return}recordOwner("drill");S.score.drill=wp.locations.find(l=>l.id===S.loc).points;S.choices.Drill=S.loc;go(6)};wireAsk("Stage 5 well placement");
+}
+
+/* ---------- 6. Reveal ---------- */
+function outcome(){const b=BLK[S.block];if(S.block!==SC.wellPlacement.block)return{...b.result,points:0};return SC.wellPlacement.outcomes[S.loc]}
+function stReveal(){
+ const o=outcome();S.out=o;S.score.reveal=o.points;S.choices.Reveal=o.title;
+ const flaw=BLK[S.block].fatalFlaw;
+ $("vis").innerHTML=`<div class="kicker">Stage 7 · The reveal</div><h2>${esc(o.title)}</h2>${revealSvg(o.sands)}<p>${esc(o.text)}</p>${flaw?`<p class="small">Fatal flaw in ${S.block}: <b>${flaw}</b>. ${known(S.block)[flaw]?.v===0?'Your data had already shown it.':'It was still a question mark in your risk table.'}</p>`:''}`;
+ const m=o.key==="disc"?"That's a discovery. Notice the model still overcalled it: four sands expected, three found. Even good wells humble you.":o.key==="marg"?"Right block, wrong spot. Seniors have drilled this exact well.":flaw?`Every element worked except one, the ${flaw.toLowerCase()}. One cross in the risk table is all it takes. This is why we buy data before we bid.`:"The trap was there; the well wasn't in it.";
+ $("panel").innerHTML=mentor(m,fbClass(o.points))+`<button class="primary" id="next" style="margin-top:12px">Go to the decision</button>`+askBlock();speak(m);$("next").onclick=()=>go(7);wireAsk("Stage 6 post-drill reveal");
+}
+
+/* ---------- 7. Decide ---------- */
+function stDecide(){
+ const o=S.out,opts=SC.decisions[o.key],st=SC.stages.decide;
+ $("vis").innerHTML=`<div class="kicker">Stage 8 · Decide under pressure</div><h2>Six months later, the world changes</h2><table><tr><th>When</th><th>Event</th></tr>${SC.events.map(e=>`<tr><td>${e.when}</td><td>${esc(e.text)}</td></tr>`).join("")}</table><p class="small" style="margin-top:10px">Your result: ${esc(o.title)} in ${S.block}</p>`;
+ $("panel").innerHTML=video(st.video)+mentor(st.intro)+teamBox("decide")+ownerPick("decide")+`<div class="opts" id="opts">${opts.map((x,j)=>`<button data-j="${j}">${esc(x.text)}</button>`).join("")}</div><div id="fb"></div><div id="nextWrap"></div>`+askBlock();speak(st.intro);
+ document.querySelectorAll("#opts button").forEach(b=>b.onclick=()=>{recordOwner("decide");const x=opts[+b.dataset.j];S.score.decide=x.points;S.choices.Decide=x.text;document.querySelectorAll("#opts button").forEach(y=>{y.disabled=true;y.classList.toggle("pick",y===b)});$("fb").innerHTML=mentor(x.feedback,fbClass(x.points))+`<p class="small">Points ${x.points}/3</p>`;$("nextWrap").innerHTML=`<button class="primary" id="next">See your debrief</button>`;$("next").onclick=()=>go(8);speak(x.feedback)});
+ wireAsk("Stage 7 commercial decision");
+}
+
+/* ---------- Debrief ---------- */
+function stDebrief(){
+ const rows=[["Data room","data"],["Screen","screen"],["Bid","bid"],["Drill","drill"],["Reveal","reveal"],["Decide","decide"]];
+ const total=rows.reduce((a,r)=>a+(S.score[r[1]]||0),0),max=rows.length*SC.scoring.maxPerStage;
+ const band=SC.scoring.bands.find(b=>total>=b.min).label;
+ const msg2={"Senior explorer instincts":"You read the data and the money the way a veteran does.","Practitioner":"Solid calls, with gaps a mentor would close quickly.","Graduate instincts":"Normal on a first run. This is exactly the experience the tool exists to give."}[band]||"";
+ $("vis").innerHTML=`<div class="kicker">Debrief · ${esc(S.team.name)}</div><h2>${band}: ${total} / ${max}</h2><p>${msg2}</p><table><tr><th>Stage</th><th>Your call</th><th>Owner</th><th>Pts</th></tr>${rows.map(r=>`<tr><td>${r[0]}</td><td>${esc(S.choices[r[0]]||"")}</td><td>${esc(S.owner[r[1]]||"Team")}</td><td>${S.score[r[1]]??0}/3</td></tr>`).join("")}</table>
+ <h3>The truth about each block</h3><table><tr><th>Block</th><th>Fatal flaw</th></tr>${SC.blocks.map(b=>`<tr><td>${b.id}</td><td>${b.fatalFlaw?b.fatalFlaw+": "+esc(b.flawText):"<b>None. All elements work.</b>"}</td></tr>`).join("")}</table>
+ <h3>Real cases behind the lessons</h3><ul class="small">${SC.realCases.map(c=>`<li>${esc(c)}</li>`).join("")}</ul>`;
+ const m=`${total} out of ${max}. Ask me why any call scored the way it did, or play again and try a different path.`;
+ $("panel").innerHTML=mentor(m)+`<div class="row" style="margin-top:14px"><button class="primary" id="again">Play again with the same team</button></div>`+askBlock();speak(m);
+ $("again").onclick=()=>{Object.assign(S,{score:{},choices:{},owner:{},bought:[],block:null,cos:null,bid:null,loc:null,out:null});go(1)};wireAsk(`Final debrief, score ${total}/${max}`);
+}
+go(0);
+</script>
+</body>
+</html>
